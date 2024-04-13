@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "semantic-ui-css/semantic.min.css";
 import React, { lazy, Suspense } from "react";
-import { Button, Container } from "semantic-ui-react";
+import { Button, Container, Input} from "semantic-ui-react";
 import GlobalStyle from "./GlobalStyles";
 import "./App.css";
 import {
@@ -71,7 +71,7 @@ function App() {
 
                   <div className="mt-5">
                     <form>
-                      <input type="number" placeholder="Amount" />
+                      <Input type="number" placeholder="Amount" style={{margin: "10px"}} required/>
                       <Button primary>Stake MCATZ</Button>
                     </form>
                   </div>
