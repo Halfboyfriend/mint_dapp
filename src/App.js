@@ -1,16 +1,55 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "semantic-ui-css/semantic.min.css";
 import React, { lazy, Suspense } from "react";
-import { Button, Container, Input} from "semantic-ui-react";
+import { Button, Container, Input, Form } from "semantic-ui-react";
 import GlobalStyle from "./GlobalStyles";
 import "./App.css";
 import {
   useWeb3ModalProvider,
   useWeb3ModalAccount,
 } from "@web3modal/ethers/react";
+import { ABI, CONTRACTADDRESS } from "./Contract";
+import { BrowserProvider, Contract, formatUnits } from "ethers";
 
 function App() {
+  const [value, setValue] = useState("");
+  const [cOwner, setOwner] = useState(false);
   const { address, isConnected } = useWeb3ModalAccount();
+  const { walletProvider } = useWeb3ModalProvider();
+
+  useEffect(() => {
+    if (isConnected) {
+      stake();
+    }
+  });
+
+  async function stake(e) {
+    e.preventDefault();
+    setOwner(true);
+
+    if (value <= 0) {
+    setOwner(false);
+
+    } else {
+      try{
+
+        const ethersProvider = new BrowserProvider(walletProvider);
+        const signer = await ethersProvider.getSigner();
+        const StakeContract = new Contract(CONTRACTADDRESS, ABI, signer);
+
+        const tx = await StakeContract.createStake(value, 0);
+        await tx.wait();
+        setOwner(false);
+
+      }catch(e){
+        console.log(e)
+    setOwner(false);
+
+      }
+
+      
+    }
+  }
 
   return (
     <Suspense>
@@ -70,10 +109,18 @@ function App() {
                   </div>
 
                   <div className="mt-5">
-                    <form>
-                      <Input type="number" placeholder="Amount" style={{margin: "10px"}} required/>
-                      <Button primary>Stake MCATZ</Button>
-                    </form>
+                    <Form onSubmit={stake}>
+                      <Input
+                        type="number"
+                        onChange={(e) => setValue(e.target.value)}
+                        placeholder="Amount"
+                        style={{ margin: "10px" }}
+                        required
+                      />
+                      <Button loading={cOwner} primary>
+                        Stake MCATZ
+                      </Button>
+                    </Form>
                   </div>
                 </div>
               </>
@@ -90,7 +137,10 @@ function App() {
                     connect your wallet.
                   </p>
                 </div>
-               <p> <w3m-button /></p>
+                <p>
+                  {" "}
+                  <w3m-button />
+                </p>
               </div>
             )}
           </div>
