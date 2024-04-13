@@ -90,7 +90,7 @@ function App() {
                     connect your wallet.
                   </p>
                 </div>
-                <w3m-button />
+               <p> <w3m-button /></p>
               </div>
             )}
           </div>
