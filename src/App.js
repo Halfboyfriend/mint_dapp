@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import "semantic-ui-css/semantic.min.css";
 import React, { lazy, Suspense } from "react";
 import { Button, Container, Input, Form } from "semantic-ui-react";
+import 'react-toastify/dist/ReactToastify.css';
 import GlobalStyle from "./GlobalStyles";
 import "./App.css";
 import {
@@ -10,6 +11,7 @@ import {
 } from "@web3modal/ethers/react";
 import { ABI, CONTRACTADDRESS } from "./Contract";
 import { BrowserProvider, Contract, formatUnits } from "ethers";
+import { ToastContainer, toast } from "react-toastify";
 
 function App() {
   const [value, setValue] = useState("");
@@ -28,26 +30,27 @@ function App() {
     setOwner(true);
 
     if (value <= 0) {
-    setOwner(false);
-
+      setOwner(false);
+      toast.info("Value must be greater than 0");
     } else {
-      try{
-
+      try {
         const ethersProvider = new BrowserProvider(walletProvider);
         const signer = await ethersProvider.getSigner();
         const StakeContract = new Contract(CONTRACTADDRESS, ABI, signer);
+        toast.info("Please confirm transaction in your wallet");
 
         const tx = await StakeContract.createStake(value, 0);
         await tx.wait();
+        toast.success(
+          "Congratulations, you have successfully staked your MCATZ tokens"
+        );
+
         setOwner(false);
-
-      }catch(e){
-        console.log(e)
-    setOwner(false);
-
+      } catch (e) {
+        console.log(e);
+        toast.error("An error occured, Transaction failed");
+        setOwner(false);
       }
-
-      
     }
   }
 
@@ -63,7 +66,7 @@ function App() {
             </div>
           </div>
         </header>
-
+        <ToastContainer />
         <section className="py-5 mt-5">
           <div className="text-center">
             <h2>MCATZ Token Staking Pool</h2>
@@ -112,12 +115,13 @@ function App() {
                     <Form onSubmit={stake}>
                       <Input
                         type="number"
+                        value={value}
                         onChange={(e) => setValue(e.target.value)}
                         placeholder="Amount"
                         style={{ margin: "10px" }}
                         required
                       />
-                      <Button loading={cOwner} primary>
+                      <Button loading={cOwner} primary type="submit">
                         Stake MCATZ
                       </Button>
                     </Form>
